@@ -67,11 +67,8 @@ fun main() {
     }
 
     bot.onCommand("/roulette") roulette@{ msg, _ ->
-        val button = InlineKeyboardButton("FDSFSDF")
         if (msg.text == null || msg.from == null || msg.text!!.split(" ").size <= 2)
             return@roulette
-        print(button)
-        bot.onCallbackQuery(button.callback_data!!, {})
         val BET = msg.text!!.split(" ")[1]
         val bet = msg.text!!.split(" ")[2].toInt()
         val user = msg.from!!.id
