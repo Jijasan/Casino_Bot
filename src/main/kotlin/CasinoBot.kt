@@ -1,9 +1,22 @@
 import com.elbekD.bot.Bot
 import com.elbekD.bot.types.KeyboardButton
+import com.elbekD.bot.types.Message
 import com.elbekD.bot.types.ReplyKeyboardMarkup
 
+val data = mutableMapOf<Int, Player>()
+
+fun runCoin(bet: Int, bot: Bot, msg: Message) {
+    data[msg.from!!.id]!!.balance += run(data[msg.from!!.id]!!.game, null, 1, bet)
+    bot.sendMessage(
+        msg.chat.id, "Your balance: " + data[msg.from!!.id]!!.balance.toString(), markup = ReplyKeyboardMarkup(
+            listOf(
+                listOf(KeyboardButton("/menu"))
+            )
+        )
+    )
+}
+
 fun main() {
-    val data = mutableMapOf<Int, Player>()
     val token = System.getenv("TOKEN")
     println(token)
     val username = "<BOT USERNAME>"
@@ -75,144 +88,72 @@ fun main() {
         if (data[msg.from!!.id]!!.balance < 10)
             bot.sendMessage(msg.chat.id, "Your balance is to low", markup = ReplyKeyboardMarkup(listOf(
                 listOf(KeyboardButton("/menu")))))
-        else {
-            data[msg.from!!.id]!!.balance += run(data[msg.from!!.id]!!.game, null, 1, 10)
-            bot.sendMessage(
-                msg.chat.id, "Your balance: " + data[msg.from!!.id]!!.balance.toString(), markup = ReplyKeyboardMarkup(
-                    listOf(
-                        listOf(KeyboardButton("/menu"))
-                    )
-                )
-            )
-        }
+        else
+            runCoin(10, bot, msg)
     }
 
     bot.onCommand("/25") {msg, _ ->
         if (data[msg.from!!.id]!!.balance < 25)
             bot.sendMessage(msg.chat.id, "Your balance is to low", markup = ReplyKeyboardMarkup(listOf(
                 listOf(KeyboardButton("/menu")))))
-        else {
-            data[msg.from!!.id]!!.balance += run(data[msg.from!!.id]!!.game, null, 1, 25)
-            bot.sendMessage(
-                msg.chat.id, "Your balance: " + data[msg.from!!.id]!!.balance.toString(), markup = ReplyKeyboardMarkup(
-                    listOf(
-                        listOf(KeyboardButton("/menu"))
-                    )
-                )
-            )
-        }
+        else
+            runCoin(25, bot, msg)
     }
 
     bot.onCommand("/50") {msg, _ ->
         if (data[msg.from!!.id]!!.balance < 50)
             bot.sendMessage(msg.chat.id, "Your balance is to low", markup = ReplyKeyboardMarkup(listOf(
                 listOf(KeyboardButton("/menu")))))
-        else {
-            data[msg.from!!.id]!!.balance += run(data[msg.from!!.id]!!.game, null, 1, 50)
-            bot.sendMessage(
-                msg.chat.id, "Your balance: " + data[msg.from!!.id]!!.balance.toString(), markup = ReplyKeyboardMarkup(
-                    listOf(
-                        listOf(KeyboardButton("/menu"))
-                    )
-                )
-            )
-        }
+        else
+            runCoin(50, bot, msg)
     }
 
     bot.onCommand("/100") {msg, _ ->
         if (data[msg.from!!.id]!!.balance < 100)
             bot.sendMessage(msg.chat.id, "Your balance is to low", markup = ReplyKeyboardMarkup(listOf(
                 listOf(KeyboardButton("/menu")))))
-        else {
-            data[msg.from!!.id]!!.balance += run(data[msg.from!!.id]!!.game, null, 1, 100)
-            bot.sendMessage(
-                msg.chat.id, "Your balance: " + data[msg.from!!.id]!!.balance.toString(), markup = ReplyKeyboardMarkup(
-                    listOf(
-                        listOf(KeyboardButton("/menu"))
-                    )
-                )
-            )
-        }
+        else
+            runCoin(100, bot, msg)
     }
 
     bot.onCommand("/250") {msg, _ ->
         if (data[msg.from!!.id]!!.balance < 250)
             bot.sendMessage(msg.chat.id, "Your balance is to low", markup = ReplyKeyboardMarkup(listOf(
                 listOf(KeyboardButton("/menu")))))
-        else {
-            data[msg.from!!.id]!!.balance += run(data[msg.from!!.id]!!.game, null, 1, 250)
-            bot.sendMessage(
-                msg.chat.id, "Your balance: " + data[msg.from!!.id]!!.balance.toString(), markup = ReplyKeyboardMarkup(
-                    listOf(
-                        listOf(KeyboardButton("/menu"))
-                    )
-                )
-            )
-        }
+        else
+            runCoin(250, bot, msg)
     }
 
     bot.onCommand("/500") {msg, _ ->
         if (data[msg.from!!.id]!!.balance < 500)
             bot.sendMessage(msg.chat.id, "Your balance is to low", markup = ReplyKeyboardMarkup(listOf(
                 listOf(KeyboardButton("/menu")))))
-        else {
-            data[msg.from!!.id]!!.balance += run(data[msg.from!!.id]!!.game, null, 1, 500)
-            bot.sendMessage(
-                msg.chat.id, "Your balance: " + data[msg.from!!.id]!!.balance.toString(), markup = ReplyKeyboardMarkup(
-                    listOf(
-                        listOf(KeyboardButton("/menu"))
-                    )
-                )
-            )
-        }
+        else
+            runCoin(500, bot, msg)
     }
 
     bot.onCommand("/1000") {msg, _ ->
         if (data[msg.from!!.id]!!.balance < 1000)
             bot.sendMessage(msg.chat.id, "Your balance is to low", markup = ReplyKeyboardMarkup(listOf(
                 listOf(KeyboardButton("/menu")))))
-        else {
-            data[msg.from!!.id]!!.balance += run(data[msg.from!!.id]!!.game, null, 1, 1000)
-            bot.sendMessage(
-                msg.chat.id, "Your balance: " + data[msg.from!!.id]!!.balance.toString(), markup = ReplyKeyboardMarkup(
-                    listOf(
-                        listOf(KeyboardButton("/menu"))
-                    )
-                )
-            )
-        }
+        else
+            runCoin(1000, bot, msg)
     }
 
     bot.onCommand("/2500") {msg, _ ->
         if (data[msg.from!!.id]!!.balance < 2500)
             bot.sendMessage(msg.chat.id, "Your balance is to low", markup = ReplyKeyboardMarkup(listOf(
                 listOf(KeyboardButton("/menu")))))
-        else {
-            data[msg.from!!.id]!!.balance += run(data[msg.from!!.id]!!.game, null, 1, 2500)
-            bot.sendMessage(
-                msg.chat.id, "Your balance: " + data[msg.from!!.id]!!.balance.toString(), markup = ReplyKeyboardMarkup(
-                    listOf(
-                        listOf(KeyboardButton("/menu"))
-                    )
-                )
-            )
-        }
+        else
+            runCoin(2500, bot, msg)
     }
 
     bot.onCommand("/5000") {msg, _ ->
         if (data[msg.from!!.id]!!.balance < 5000)
             bot.sendMessage(msg.chat.id, "Your balance is to low", markup = ReplyKeyboardMarkup(listOf(
                 listOf(KeyboardButton("/menu")))))
-        else {
-            data[msg.from!!.id]!!.balance += run(data[msg.from!!.id]!!.game, null, 1, 5000)
-            bot.sendMessage(
-                msg.chat.id, "Your balance: " + data[msg.from!!.id]!!.balance.toString(), markup = ReplyKeyboardMarkup(
-                    listOf(
-                        listOf(KeyboardButton("/menu"))
-                    )
-                )
-            )
-        }
+        else
+            runCoin(5000, bot, msg)
     }
 
     bot.start()
