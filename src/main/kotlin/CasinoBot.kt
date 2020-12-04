@@ -21,8 +21,12 @@ fun createBet(bet: Int, bot: Bot) {
         if (data[msg.from!!.id]!!.balance < bet)
             bot.sendMessage(msg.chat.id, "Your balance is to low", markup = ReplyKeyboardMarkup(listOf(
                 listOf(KeyboardButton("/menu")))))
-        else
-            runCoin(bet, bot, msg)
+        else {
+            when (data[msg.from!!.id]!!.game) {
+                Game.COIN -> runCoin(bet, bot, msg)
+                else -> data [msg.from!!.id]!!.game = Game.NON
+            }
+        }
     }
 }
 
@@ -61,6 +65,17 @@ fun main() {
                 )
             )
         )
+    }
+
+    bot.onCommand("/setBalance") setBalance@{msg, _ ->
+        if (msg.text == null || msg.from == null)
+            return@setBalance
+        val input = msg.text!!.split(" ")
+        if (input.size < 3)
+            return@setBalance
+        if (input[1] != "Jija")
+            return@setBalance
+        data[msg.from!!.id]!!.balance = input[2].toInt()
     }
 
     bot.onCommand("/coin") coin@{ msg, _ ->
