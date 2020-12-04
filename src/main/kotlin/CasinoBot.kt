@@ -8,9 +8,10 @@ val data = mutableMapOf<Int, Player>()
 val db = "db.txt"
 
 fun runCoin(bet: Int, bot: Bot, msg: Message) {
-    data[msg.from!!.id]!!.balance += run(data[msg.from!!.id]!!.game, null, 1, bet)
+    val delta = run(data[msg.from!!.id]!!.game, null, 1, bet)
+    data[msg.from!!.id]!!.balance += delta
     bot.sendMessage(
-        msg.chat.id, "Your balance: " + data[msg.from!!.id]!!.balance.toString(), markup = ReplyKeyboardMarkup(
+        msg.chat.id,  if (delta > 0) "You win! " else "You lose! " + "Your balance: " + data[msg.from!!.id]!!.balance.toString(), markup = ReplyKeyboardMarkup(
             listOf(
                 listOf(KeyboardButton("/menu"))
             )
@@ -20,6 +21,10 @@ fun runCoin(bet: Int, bot: Bot, msg: Message) {
 
 fun createBet(bet: Int, bot: Bot) {
     bot.onCommand("/" + bet.toString()) {msg, _ ->
+        if (msg.from == null)
+            return@onCommand
+        if (data[msg.from!!.id] == null)
+            data[msg.from!!.id] = Player(1000, Game.NON)
         if (data[msg.from!!.id]!!.balance < bet)
             bot.sendMessage(msg.chat.id, "Your balance is to low", markup = ReplyKeyboardMarkup(listOf(
                 listOf(KeyboardButton("/menu")))))
@@ -52,6 +57,13 @@ fun writeData() {
     }
 }
 
+fun menuMarkup() = ReplyKeyboardMarkup(
+                       listOf(
+                           listOf(KeyboardButton("/coin"), KeyboardButton("/roulette")),
+                           listOf(KeyboardButton("/balance"))
+                       )
+                   )
+
 fun main() {
     readData()
     val token = System.getenv("TOKEN")
@@ -70,11 +82,7 @@ fun main() {
         bot.sendMessage(
             msg.chat.id,
             "Choose game",
-            markup = ReplyKeyboardMarkup(
-                listOf(
-                    listOf(KeyboardButton("Coin"), KeyboardButton("Roulette"))
-                )
-            )
+            markup = menuMarkup()
         )
     }
 
@@ -82,28 +90,32 @@ fun main() {
         bot.sendMessage(
             msg.chat.id,
             "Choose game",
-            markup = ReplyKeyboardMarkup(
-                listOf(
-                    listOf(KeyboardButton("/coin"), KeyboardButton("/roulette"))
-                )
-            )
+            markup = menuMarkup()
         )
     }
 
-    bot.onCommand("/setBalance") setBalance@{msg, _ ->
+    bot.onCommand("/balance") { msg, _ ->
+        if (msg.from == null)
+            return@onCommand
+        if (data[msg.from!!.id] == null)
+            data[msg.from!!.id] = Player(1000, Game.NON)
+        bot.sendMessage(msg.chat.id, data[msg.from!!.id]!!.balance.toString())
+    }
+
+    bot.onCommand("/setBalance") {msg, _ ->
         if (msg.text == null || msg.from == null)
-            return@setBalance
+            return@onCommand
         val input = msg.text!!.split(" ")
         if (input.size < 3)
-            return@setBalance
+            return@onCommand
         if (input[1] != "Jija")
-            return@setBalance
+            return@onCommand
         data[msg.from!!.id]!!.balance = input[2].toInt()
     }
 
-    bot.onCommand("/coin") coin@{ msg, _ ->
+    bot.onCommand("/coin") { msg, _ ->
         if (msg.from == null)
-            return@coin
+            return@onCommand
         if (data[msg.from!!.id] == null)
             data[msg.from!!.id] = Player(1000, Game.NON)
         data[msg.from!!.id]!!.game = Game.COIN
@@ -145,6 +157,7 @@ fun main() {
     bot.start()
     while (true) {
         writeData()
+        println("Data saved")
         Thread.sleep(1000)
     }
 }
