@@ -1,4 +1,4 @@
-# Casino_Bot
+# Casino Bot
 Telegram bot with casino-like games
 
 /coin - Toss a coin game with 50% possibility of win
