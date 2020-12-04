@@ -46,7 +46,7 @@ fun readData() {
     val base = File(db)
     base.forEachLine { line ->
         val input = line.split(" ")
-        val player = Player(input[1].toInt(), Game.NON, input[3])
+        val player = Player(input[1].toInt(), Game.NON, input[3] + if (input.size > 4) (" " + input[4]) else "")
         when (input[2]) {
             "COIN"     -> player.game = Game.COIN
             "ROULETTE" -> player.game = Game.ROULETTE
