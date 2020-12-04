@@ -2,8 +2,10 @@ import com.elbekD.bot.Bot
 import com.elbekD.bot.types.KeyboardButton
 import com.elbekD.bot.types.Message
 import com.elbekD.bot.types.ReplyKeyboardMarkup
+import java.io.File
 
 val data = mutableMapOf<Int, Player>()
+val db = "db.txt"
 
 fun runCoin(bet: Int, bot: Bot, msg: Message) {
     data[msg.from!!.id]!!.balance += run(data[msg.from!!.id]!!.game, null, 1, bet)
@@ -30,7 +32,28 @@ fun createBet(bet: Int, bot: Bot) {
     }
 }
 
+fun readData() {
+    val base = File(db)
+    base.forEachLine { line ->
+        val input = line.split(" ")
+        val player = Player(input[1].toInt(), Game.NON)
+        when (input[2]) {
+            "COIN"     -> player.game = Game.COIN
+            "ROULETTE" -> player.game = Game.ROULETTE
+        }
+        data[input[0].toInt()] = player
+    }
+}
+
+fun writeData() {
+    val base = File(db)
+    data.forEach { id, player ->
+        base.writeText(id.toString() + " " + player.toString())
+    }
+}
+
 fun main() {
+    readData()
     val token = System.getenv("TOKEN")
     println(token)
     val username = "<BOT USERNAME>"
@@ -120,4 +143,8 @@ fun main() {
     createBet(5000, bot)
 
     bot.start()
+    while (true) {
+        writeData()
+        Thread.sleep(1000)
+    }
 }
