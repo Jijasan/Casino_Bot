@@ -1,23 +1,41 @@
+package org.github.KS2003.CasinoBot
+
 import kotlin.random.Random
 
-enum class Game{
-    COIN,
-    ROULETTE,
-    NON
+class Game(
+    val type: Type,
+    var numbers: MutableList<Pair<Pair<Int, Int>, List<Int>>>? = null,
+    val bet: Int? = null,
+    var win: Int? = null
+) {
+    enum class Type {
+        COIN,
+        ROULETTE,
+        NON
+    }
+
+    override fun toString() = type.toString()
 }
 
-class Field(field: Int)
-
-fun run(game: Game, fields: List<Field>?, multi: Int, bet: Int): Int {
-    when (game) {
-        Game.COIN -> {
+fun run(game: Game): Int {
+    when (game.type) {
+        Game.Type.COIN -> {
             if (Random.nextBoolean())
-                return@run bet
+                return@run game.bet!!
             else
-                return@run -bet
+                return@run -game.bet!!
         }
-        Game.ROULETTE -> {
-
+        Game.Type.ROULETTE -> {
+            val result = Random.nextInt(0, 38)
+            game.win = result
+            var win = 0
+            game.numbers!!.forEach { (bet, fields) ->
+                if (result in fields)
+                    win += bet.first * bet.second
+                else
+                    win -= bet.second
+            }
+            return win
         }
     }
     return 0
