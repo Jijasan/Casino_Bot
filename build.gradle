@@ -12,6 +12,11 @@ repositories {
     maven { url "https://jitpack.io" }
 }
 
+jar {
+    baseName = 'kotlin-casino-bot'
+    version = '1.0'
+}
+
 task stage(dependsOn: ['build', 'clean'])
 build.mustRunAfter clean
 
