@@ -21,13 +21,6 @@ fun roulette1Markup() = ReplyKeyboardMarkup(
     )
 )
 
-fun menuMarkup() = ReplyKeyboardMarkup(
-    listOf(
-        listOf(KeyboardButton("Coin"), KeyboardButton("Roulette")),
-        listOf(KeyboardButton("Balance"), KeyboardButton("Top"))
-    )
-)
-
 fun betMarkup() = ReplyKeyboardMarkup(
     listOf(
         listOf(
@@ -132,13 +125,15 @@ fun verticalSplitMarkup() = ReplyKeyboardMarkup(
             KeyboardButton((3 * i + 2).toString() + "|" + (3 * i + 5).toString()),
             KeyboardButton((3 * i + 3).toString() + "|" + (3 * i + 6).toString())
         )
-    })
+    }
+)
 
 fun horizontalSplitMarkup() = ReplyKeyboardMarkup(
     List(12) {i -> listOf(
         KeyboardButton((3 * i + 1).toString() + "-" + (3 * i + 2).toString()),
         KeyboardButton((3 * i + 2).toString() + "-" + (3 * i + 3).toString())
-    )})
+    )}
+)
 
 fun dozenMarkup() = ReplyKeyboardMarkup(
     listOf(
@@ -167,16 +162,47 @@ fun columnMarkup() = ReplyKeyboardMarkup(
 fun streetMarkup() = ReplyKeyboardMarkup(
     List(12) {i -> listOf(
         KeyboardButton((3 * i + 1).toString() + "-" + (3 * i + 3).toString())
-    )})
+    )}
+)
 
 fun lineMarkup() = ReplyKeyboardMarkup(
     List(11) { i -> listOf(
         KeyboardButton((3 * i + 1).toString() + "^" + (3 * i + 6).toString())
-    )})
+    )}
+)
 
 fun cornerMarkup() = ReplyKeyboardMarkup(
     List(11) { i -> listOf(
         KeyboardButton((3 * i + 1).toString() + "^" + (3 * i + 5).toString()),
         KeyboardButton((3 * i + 2).toString() + "^" + (3 * i + 6).toString())
-    )})
+    )}
+)
 
+fun lobbyMarkup() = ReplyKeyboardMarkup(
+    listOf(
+        listOf(KeyboardButton("Join lobby")),
+        listOf(KeyboardButton("Create lobby")),
+        listOf(KeyboardButton("Return to menu"))
+    )
+)
+
+fun gameTypeMarkup() = ReplyKeyboardMarkup(
+    listOf(
+        listOf(KeyboardButton("Dice"))
+    )
+)
+
+fun hostMarkup() = ReplyKeyboardMarkup(
+    listOf(
+        listOf(KeyboardButton("Start")),
+        listOf(KeyboardButton("Leave and delete lobby"))
+    )
+)
+
+fun menuMarkup() = ReplyKeyboardMarkup(
+    listOf(
+        listOf(KeyboardButton("Coin"), KeyboardButton("Roulette")),
+        listOf(KeyboardButton("Balance"), KeyboardButton("Top")),
+        listOf(KeyboardButton("Create lobby"), KeyboardButton("Get list of lobbies"))
+    )
+)

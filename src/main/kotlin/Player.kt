@@ -1,6 +1,7 @@
 package org.github.KS2003.CasinoBot
 
 class Player (var balance: Int, var game: Game, var name: String) : Comparable<Player> {
+    var lobbyId = -1
 
     override fun toString() = balance.toString() + " " + game.toString() + " " + name
 

@@ -1,10 +1,15 @@
 package org.github.KS2003.CasinoBot
 
+import com.github.KS2003.telegramAPI.Bot
+import com.github.KS2003.telegramAPI.KeyboardButton
+import com.github.KS2003.telegramAPI.Message
+import com.github.KS2003.telegramAPI.ReplyKeyboardMarkup
 import java.io.File
-import com.github.KS2003.telegramAPI.*
+import org.github.KS2003.CasinoBot.games.Dice
 import kotlin.math.min
 
 val data = mutableMapOf<Int, Player>()
+var lobbies = mutableMapOf<Int, Lobby>()
 val db = "db.txt"
 
 fun runCoin(bot: Bot, msg: Message) {
@@ -32,9 +37,14 @@ fun createBet(bet: Int, bot: Bot) {
         initPlayer(msg)
         if (data[msg.from!!.id]!!.balance < bet)
             bot.sendMessage(msg.chat.id, "Your balance is to low", reply_markup = ReplyKeyboardMarkup(listOf(
-                listOf(KeyboardButton("/menu")))))
+                listOf(KeyboardButton("/menu"))))
+            )
         else {
-            when (data[msg.from!!.id]!!.game.type) {
+            if (lobbies.contains(data[msg.from!!.id]!!.lobbyId)) {
+                lobbies[data[msg.from!!.id]!!.lobbyId]!!.bet = bet
+                bot.sendMessage(msg.chat.id, "Lobby created", reply_markup = hostMarkup())
+            }
+            else when (data[msg.from!!.id]!!.game.type) {
                 Game.Type.COIN -> {
                     data [msg.from!!.id]!!.game = Game(Game.Type.COIN, bet = bet)
                     runCoin(bot, msg)
@@ -355,7 +365,7 @@ fun main() {
         bot.sendMessage(msg.chat.id, data[msg.from!!.id]!!.balance.toString() + "₽")
     }
 
-    bot.onCommand("/setBalance") {msg, _ ->
+    bot.onCommand("/setBalance") { msg, _ ->
         if (msg.text == null || msg.from == null)
             return@onCommand
         val input = msg.text!!.split(" ")
@@ -371,20 +381,96 @@ fun main() {
             return@onCommand
         initPlayer(msg)
         data[msg.from!!.id]!!.game = Game(Game.Type.COIN)
-        bot.sendMessage(
-            msg.chat.id,
-            "Choose your bet",
-            reply_markup = betMarkup()
-        )
+        bot.sendMessage(msg.chat.id, "Choose your bet", reply_markup = betMarkup())
     }
 
     createRoulette(bot)
+
+    bot.onCommand("Create lobby") { msg, _ ->
+        bot.sendMessage(msg.chat.id, "Choose game", reply_markup = gameTypeMarkup())
+    }
+
+    bot.onCommand("Dice") { msg, _ ->
+        if (msg.from == null)
+            return@onCommand
+        initPlayer(msg)
+        val id = (Math.random() * 1000000000).toInt()
+        lobbies.put(id, Lobby(Dice(bot), id, bot))
+        lobbies[id]!!.connect(data[msg.from!!.id]!!, msg.chat.id)
+        bot.sendMessage(msg.chat.id, "Choose bet", reply_markup = betMarkup())
+    }
+
+    bot.onCommand("Start") { msg, _ ->
+        if (msg.from == null || !data.contains(msg.from!!.id) || !lobbies.contains(data[msg.from!!.id]!!.lobbyId))
+            return@onCommand
+        lobbies[data[msg.from!!.id]!!.lobbyId]!!.start()
+        lobbies = lobbies.minus(data[msg.from!!.id]!!.lobbyId).toMutableMap()
+    }
+
+    bot.onCommand("Leave and delete lobby") { msg, _ ->
+        if (msg.from == null || !data.contains(msg.from!!.id))
+            return@onCommand
+        val index = data[msg.from!!.id]!!.lobbyId
+        if (!lobbies.contains(index))
+            return@onCommand
+        val lobby = lobbies[index]!!
+        lobby.players.forEach { (player, id) ->
+            player.lobbyId = -1
+            bot.sendMessage(id, "Lobby deleted", reply_markup = menuMarkup())
+        }
+        lobbies = lobbies.filter { it.key != lobby.id }.toMutableMap()
+    }
+
+    bot.onCommand("Get list of lobbies") { msg, _ ->
+        var message = "List of lobbies:\n\n"
+        lobbies.forEach { entry: Map.Entry<Int, Lobby> ->
+            val index = entry.key
+            val lobby = entry.value
+            message += "Lobby $index \nGame: ${lobby.game.title} \nBet: ${lobby.bet}\nNumber of players: ${lobby.players.size}/${lobby.game.maximumPlayer}\n\n"
+        }
+        bot.sendMessage(msg.chat.id, message, reply_markup = lobbyMarkup())
+    }
+
+    bot.onCommand("Join lobby") { msg, _ ->
+        val lobbiesMarkup = ReplyKeyboardMarkup(lobbies.map { it -> listOf(KeyboardButton("id: ${it.key}")) })
+        bot.sendMessage(msg.chat.id, "Choose lobby", reply_markup = lobbiesMarkup)
+    }
+
+    bot.onCommand("id: ") { msg, _ ->
+        if (msg.from == null)
+            return@onCommand
+        initPlayer(msg)
+        val id = msg.text!!.split(" ").last().toInt()
+        if (!lobbies.contains(id))
+            return@onCommand
+        if (lobbies[id]!!.connect(data[msg.from!!.id]!!, msg.chat.id))
+            bot.sendMessage(
+                msg.chat.id, "Successfully connected\nPlease wait, until game starts",
+                reply_markup = ReplyKeyboardMarkup(listOf(listOf(KeyboardButton("Leave lobby"))))
+            )
+        else
+            bot.sendMessage(msg.chat.id, "Lobby is full", reply_markup = menuMarkup())
+    }
+
+    bot.onCommand("Leave lobby") {msg, _ ->
+        if (msg.from == null || !data.contains(msg.from!!.id))
+            return@onCommand
+        val player = data[msg.from!!.id]!!
+        if (!lobbies.contains(player.lobbyId))
+            return@onCommand
+        lobbies[player.lobbyId]!!.disconnect(player, msg.chat.id)
+        bot.sendMessage(msg.chat.id, "Successfully left", reply_markup = menuMarkup())
+    }
+
+    bot.onCommand("Return to menu") { msg, _ ->
+        bot.sendMessage(msg.chat.id, "Choose game", reply_markup = menuMarkup())
+    }
 
     bot.onCommand("Top") { msg, _ ->
         var message = ""
         var top = data.values.toList().sorted()
         top = top.subList(0, min(10, top.size))
-        top.forEach {player ->  message += player.name + " " + player.balance + "₽\n"}
+        top.forEach { player -> message += player.name + " " + player.balance + "₽\n" }
         bot.sendMessage(msg.chat.id, message, reply_markup = menuMarkup())
     }
 
