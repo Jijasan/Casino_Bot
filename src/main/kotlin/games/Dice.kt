@@ -10,7 +10,7 @@ class Dice(val bot: Bot): OnlineGame(bot) {
     var result = mutableListOf<Int>()
 
     override fun init() {
-        result = MutableList(players.size, { i -> 0})
+        result = MutableList(players.size, { _ -> 0 })
     }
 
     override fun turn(): Boolean {
@@ -21,8 +21,8 @@ class Dice(val bot: Bot): OnlineGame(bot) {
 
     override fun finish() {
         players.forEachIndexed { index, (player, id) ->
-            if (result[index] == result.max()) {
-                val delta = (bet * players.size) / result.count { it == result.max()} - bet
+            if (result[index] == result.maxOrNull()) {
+                val delta = (bet * players.size) / result.count { it == result.maxOrNull()} - bet
                 player.balance += delta
                 bot.sendMessage(id, "You won $delta₽", reply_markup = menuMarkup())
             }
